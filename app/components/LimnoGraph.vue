@@ -234,8 +234,10 @@ function drawChart() {
       dot.select("circle").attr("fill", color(String(closest.year)));
     })
     .on("pointerleave", () => {
-      // Reset lines and hide dot/tooltip
-      pathElements.attr("stroke-width", 1.5).attr("opacity", 1);
+      // Reset all lines to default stroke-width and opacity
+      gLines.selectAll("path")
+        .attr("stroke-width", 1.5)
+        .attr("opacity", 1);
       dot.attr("display", "none");
       tooltip.value.show = false;
     })
