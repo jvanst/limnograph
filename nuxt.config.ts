@@ -18,15 +18,18 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/tailwindcss',
-    '@nuxtjs/color-mode'
+    '@nuxtjs/color-mode',
+    "nitro-cloudflare-dev"
   ],
   tailwindcss: {
     exposeConfig: true,
     viewer: true,
   },
   nitro: {
-    prerender: {
-      autoSubfolderIndex: false
+    preset: "cloudflare_module",
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true
     }
-  }
+  },
 })

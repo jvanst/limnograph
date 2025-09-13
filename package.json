@@ -1,13 +1,15 @@
 {
-  "name": "nuxt-app",
+  "name": "limnograph",
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build --preset=cloudflare_pages",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "preview": "npm run build && wrangler dev",
+    "postinstall": "nuxt prepare",
+    "deploy": "npm run build && wrangler deploy",
+		"cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
@@ -23,6 +25,9 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@types/d3": "^7.4.3"
+    "@types/d3": "^7.4.3",
+    "nitro-cloudflare-dev": "^0.2.2",
+    "nitropack": "^2.12.6",
+    "wrangler": "^4.36.0"
   }
 }
