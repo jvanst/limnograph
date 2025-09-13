@@ -1,4 +1,4 @@
-// Auto-generated from daily_historical.csv
+// Auto-generated from current_year.csv and historical.csv
 export const points2017 = {
   year: 2017,
   min: 8.519,

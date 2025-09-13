@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as d3 from "d3";
-import { YEARS, GLOBAL_MIN, GLOBAL_MAX } from "~/data/years";
+import { YEARS, GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
 import { getContrastColorPalette } from "~/util/color";
 
 const props = defineProps<{

@@ -5,10 +5,10 @@ import SelectAll from "./components/SelectAll.vue";
 import LimnoGraph from "~/components/LimnoGraph.vue";
 import AppBadge from "~/components/AppBadge.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
-import { YEARS } from "~/data/years/index";
+import { YEARS } from "~/data/formatted/index";
 
-import "~/data/years/2024"; // preload the default year
-const DEFAULT_YEAR = 2024;
+import "~/data/formatted/2025"; // preload the default year
+const DEFAULT_YEAR = 2025;
 
 const { query } = useRoute();
 const router = useRouter();
@@ -49,7 +49,7 @@ watch(
 
 async function loadYear(year: number) {
   if (yearData.value[year]) return; // Already loaded
-  const mod = await import(`~/data/years/${year}.ts`);
+  const mod = await import(`~/data/formatted/${year}.ts`);
   yearData.value[year] = mod[`points${year}`]; // All points files export const points<year>
 }
 
@@ -75,7 +75,7 @@ const selectedSeries = computed(() =>
 </script>
 
 <template>
-  <div class="container mx-auto">
+  <div class="container mx-auto max-w-6xl">
     <header class="my-8 text-center">
       <h1 class="text-4xl font-bold mb-2">Kawagama <i>Limnograph</i></h1>
       <h2 class="text-lg text-gray-600 max-w-2xl mx-auto">
