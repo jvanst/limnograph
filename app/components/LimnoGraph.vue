@@ -23,6 +23,17 @@ const tooltip = ref({
   day: null as number | null,
 });
 
+// Helper to convert day-of-year to month name and day of month
+function getMonthDay(day: number | null): string {
+  if (day == null) return "";
+  // Use year 2000 (leap year) for correct mapping
+  const date = new Date(2000, 0, 1);
+  date.setDate(date.getDate() + day);
+  const month = date.toLocaleString("default", { month: "short" });
+  const dayOfMonth = date.getDate();
+  return `${month} ${dayOfMonth}`;
+}
+
 let resizeObserver: ResizeObserver | null = null;
 
 function updateChartWidth() {
@@ -288,7 +299,7 @@ watch(() => props.series, drawChart);
       }"
     >
       <div>
-        <b>{{ tooltip.year }}</b> — Day {{ tooltip.day }}
+        <b>{{ tooltip.year }}</b> — {{ getMonthDay(tooltip.day) }}
       </div>
       <div>
         Value: <b>{{ tooltip.value?.toFixed(2) }}m</b>
