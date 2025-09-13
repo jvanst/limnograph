@@ -11,6 +11,11 @@ export default defineNuxtConfig({
       }
     }
   },
+  colorMode: {
+    classSuffix: '', // Ensure Tailwind uses 'dark' class
+    preference: 'system',
+    fallback: 'light',
+  },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: [

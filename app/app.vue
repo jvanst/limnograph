@@ -4,6 +4,7 @@ import SelectYear from "./components/SelectYear.vue";
 import SelectAll from "./components/SelectAll.vue";
 import LimnoGraph from "~/components/LimnoGraph.vue";
 import AppBadge from "~/components/AppBadge.vue";
+import ThemeToggle from "./components/ThemeToggle.vue";
 import { YEARS } from "~/data/years/index";
 
 import "~/data/years/2024"; // preload the default year
@@ -110,5 +111,6 @@ const selectedSeries = computed(() =>
         />
       </div>
     </div>
+    <ThemeToggle class="fixed bottom-4 right-4" />
   </div>
 </template>
