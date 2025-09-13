@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import * as d3 from "d3";
 import { YEARS, GLOBAL_MIN, GLOBAL_MAX } from "~/data/years";
+import { getContrastColorPalette } from "~/util/color";
 
 const props = defineProps<{
   series: YearlyPoints[];
 }>();
+
+const colorMode = useColorMode(); // colorMode.value is 'dark' or 'light'
 
 const svg = ref<SVGSVGElement | null>(null);
 const container = ref<HTMLElement | null>(null);
@@ -98,12 +101,16 @@ function drawChart() {
 
   // Color scale: assigns a unique color to each year
   // Ensure consistent color mapping across years and browsing sessions
-  const colorPalette = [
-    ...d3.schemeCategory10,
-    ...(Array.isArray(d3.schemeSet3) ? d3.schemeSet3 : []),
-    ...(Array.isArray(d3.schemePaired) ? d3.schemePaired : []),
-    ...(Array.isArray(d3.schemeDark2) ? d3.schemeDark2 : []),
-  ].filter((c) => typeof c === "string");
+  const backgroundColor = colorMode.value === "dark" ? "#091a28" : "#FFFFFF";
+  const colorPalette = getContrastColorPalette(
+    [
+      ...d3.schemeCategory10,
+      ...(Array.isArray(d3.schemeSet3) ? d3.schemeSet3 : []),
+      ...(Array.isArray(d3.schemePaired) ? d3.schemePaired : []),
+      ...(Array.isArray(d3.schemeDark2) ? d3.schemeDark2 : []),
+    ].filter((c) => typeof c === "string"),
+    backgroundColor
+  );
   const color = d3
     .scaleOrdinal<string, string>()
     .domain(YEARS.map(String))
@@ -260,7 +267,7 @@ watch(() => props.series, drawChart);
 
 <template>
   <div ref="container" class="w-full relative">
-    <svg v-if="props.series.length" ref="svg" class="block w-full h-auto"></svg>
+  <svg v-if="props.series.length" ref="svg" class="block w-full h-auto" />
     <div
       v-else
       class="flex items-center justify-center w-full text-gray-400 dark:text-gray-300 text-lg bg-white dark:bg-[#182c3a] border border-dashed border-gray-200 dark:border-gray-700 rounded-lg"
