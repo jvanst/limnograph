@@ -1,0 +1,29 @@
+name: Update CSV Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Runs daily at 6am UTC
+  workflow_dispatch:
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run download script
+        run: bash current_year_download.sh
+        working-directory: app/data
+
+      - name: Format data
+        run: node _format.js
+        working-directory: app/data
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/data/current_year.csv
+          git commit -m "Update current_year.csv [auto]" || echo "No changes to commit"
+          git push
