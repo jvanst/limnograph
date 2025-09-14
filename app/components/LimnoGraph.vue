@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import * as d3 from "d3";
 import { GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
+import {
+  normalOperating,
+  upperOperating,
+  lowerOperating,
+} from "~/data/formatted/operatingZones";
 
 const props = defineProps<{
   series: YearlyPoints[];
@@ -13,7 +18,6 @@ const container = ref<HTMLElement | null>(null);
 const width = ref(800);
 const height = ref(400);
 const currentYear = new Date().getFullYear();
-const isLoading = ref(true);
 
 const tooltip = ref({
   show: false,
@@ -41,8 +45,6 @@ function updateChartWidth() {
 }
 
 function drawChart() {
-  isLoading.value = true;
-
   // Chart dimensions and margins
   const w = width.value;
   const h = height.value;
@@ -68,6 +70,216 @@ function drawChart() {
     .domain([GLOBAL_MIN, GLOBAL_MAX])
     .nice()
     .range([h - margin.bottom, margin.top]);
+
+  ///////////////////////////
+
+  // Ensure overlay group exists (behind data lines)
+  let gOverlay: d3.Selection<SVGGElement, unknown, null, undefined> =
+    svgEl.select<SVGGElement>("g.overlay-zone");
+  if (gOverlay.empty()) {
+    gOverlay = svgEl.insert("g", ":first-child").attr("class", "overlay-zone");
+  }
+
+  // Build a unified set of day values from both bounds
+  const allDays = Array.from(
+    new Set([
+      ...normalOperating.upper.map((d) => d.day),
+      ...normalOperating.lower.map((d) => d.day),
+    ])
+  ).sort((a, b) => a - b);
+  // Build a unified set of day values for low water
+  const allDaysLowWater = Array.from(
+    new Set(lowerOperating.lower.map((d) => d.day))
+  ).sort((a, b) => a - b);
+  const areaDataLowWater = allDaysLowWater.map((day) => ({
+    day,
+    value: interpolate(lowerOperating.lower, day),
+  }));
+
+  // --- High Water uses upperOperatingBounds.upper as lower edge ---
+  const allDaysHighWater = Array.from(
+    new Set(upperOperating.upper.map((d) => d.day))
+  ).sort((a, b) => a - b);
+  const areaDataHighWater = allDaysHighWater.map((day) => ({
+    day,
+    value: interpolate(upperOperating.upper, day),
+  }));
+  // Helper to interpolate value for a given day from a break array
+  function interpolate(
+    breaks: { day: number; value: number }[],
+    day: number
+  ): number {
+    if (!breaks || breaks.length === 0) return 0;
+    for (let i = 0; i < breaks.length - 1; i++) {
+      const d0 = breaks[i];
+      const d1 = breaks[i + 1];
+      if (d0 && d1 && d0.day <= day && d1.day >= day) {
+        const t = (day - d0.day) / (d1.day - d0.day);
+        return d0.value + t * (d1.value - d0.value);
+      }
+    }
+    // If exact match or out of bounds, fallback to closest
+    const found = breaks.find((b) => b.day === day);
+    if (found) return found.value;
+    const first = breaks[0];
+    const last = breaks[breaks.length - 1];
+    if (!first || !last) return 0;
+    return day < first.day ? first.value : last.value;
+  }
+
+  // --- Lower Operating Bounds Area ---
+  const allDaysLower = Array.from(
+    new Set([
+      ...lowerOperating.upper.map((d) => d.day),
+      ...lowerOperating.lower.map((d) => d.day),
+    ])
+  ).sort((a, b) => a - b);
+
+  const areaDataLower = allDaysLower.map((day) => ({
+    day,
+    upper: interpolate(lowerOperating.upper, day),
+    lower: interpolate(lowerOperating.lower, day),
+  }));
+
+  const areaLower = d3
+    .area<{ day: number; upper: number; lower: number }>()
+    .x((d) => x(d.day))
+    .y0((d) => y(d.lower))
+    .y1((d) => y(d.upper))
+    .curve(d3.curveLinear);
+
+  const overlayPathLower = gOverlay
+    .selectAll<SVGPathElement, typeof areaDataLower>("path.zone-lower")
+    .data([areaDataLower]);
+
+  overlayPathLower
+    .enter()
+    .append("path")
+    .attr("class", "zone-lower")
+    .merge(overlayPathLower)
+    .attr("d", areaLower)
+    .attr("fill", "#cddc39") // muted green-yellow
+    .attr("opacity", 0.18);
+
+  overlayPathLower.exit().remove();
+
+  // --- High Water Area ---
+  const areaHighWater = d3
+    .area<{ day: number; value: number }>()
+    .x((d) => x(d.day))
+    .y0((d) => y(d.value))
+    .y1(() => y(GLOBAL_MAX))
+    .curve(d3.curveLinear);
+
+  const overlayPathHighWater = gOverlay
+    .selectAll<SVGPathElement, typeof areaDataHighWater>("path.zone-highwater")
+    .data([areaDataHighWater]);
+
+  overlayPathHighWater
+    .enter()
+    .append("path")
+    .attr("class", "zone-highwater")
+    .merge(overlayPathHighWater)
+    .attr("d", areaHighWater)
+    .attr("fill", "#fff176") // muted yellow
+    .attr("opacity", 0.18);
+
+  overlayPathHighWater.exit().remove();
+
+  // --- Low Water Area ---
+  const areaLowWater = d3
+    .area<{ day: number; value: number }>()
+    .x((d) => x(d.day))
+    .y0(() => y(GLOBAL_MIN))
+    .y1((d) => y(d.value))
+    .curve(d3.curveLinear);
+
+  const overlayPathLowWater = gOverlay
+    .selectAll<SVGPathElement, typeof areaDataLowWater>("path.zone-lowwater")
+    .data([areaDataLowWater]);
+
+  overlayPathLowWater
+    .enter()
+    .append("path")
+    .attr("class", "zone-lowwater")
+    .merge(overlayPathLowWater)
+    .attr("d", areaLowWater)
+    .attr("fill", "#fff176") // muted yellow
+    .attr("opacity", 0.18);
+
+  overlayPathLowWater.exit().remove();
+  // --- Upper Operating Bounds Area ---
+  // Build a unified set of day values from both bounds
+  const allDaysUpper = Array.from(
+    new Set([
+      ...upperOperating.upper.map((d) => d.day),
+      ...upperOperating.lower.map((d) => d.day),
+    ])
+  ).sort((a, b) => a - b);
+
+  // Area dataset: for each day, interpolate upper and lower values
+  const areaDataUpper = allDaysUpper.map((day) => ({
+    day,
+    upper: interpolate(upperOperating.upper, day),
+    lower: interpolate(upperOperating.lower, day),
+  }));
+
+  // Area generator for upper bounds
+  const areaUpper = d3
+    .area<{ day: number; upper: number; lower: number }>()
+    .x((d) => x(d.day))
+    .y0((d) => y(d.lower))
+    .y1((d) => y(d.upper))
+    .curve(d3.curveLinear);
+
+  // --- Shaded zone for upper bounds ---
+  const overlayPathUpper = gOverlay
+    .selectAll<SVGPathElement, typeof areaDataUpper>("path.zone-upper")
+    .data([areaDataUpper]);
+
+  overlayPathUpper
+    .enter()
+    .append("path")
+    .attr("class", "zone-upper")
+    .merge(overlayPathUpper)
+    .attr("d", areaUpper)
+    .attr("fill", "#cddc39") // muted green-yellow
+    .attr("opacity", 0.18);
+
+  overlayPathUpper.exit().remove();
+
+  // Area dataset: for each day, interpolate upper and lower values
+  const areaData = allDays.map((day) => ({
+    day,
+    upper: interpolate(normalOperating.upper, day),
+    lower: interpolate(normalOperating.lower, day),
+  }));
+
+  // Area generator
+  const area = d3
+    .area<{ day: number; upper: number; lower: number }>()
+    .x((d) => x(d.day))
+    .y0((d) => y(d.lower))
+    .y1((d) => y(d.upper))
+    .curve(d3.curveLinear);
+
+  // --- Shaded zone ---
+  const overlayPath = gOverlay
+    .selectAll<SVGPathElement, typeof areaData>("path.zone")
+    .data([areaData]);
+
+  overlayPath
+    .enter()
+    .append("path")
+    .attr("class", "zone")
+    .merge(overlayPath)
+    .attr("d", area)
+  .attr("fill", "#27ae60") // balanced pure green
+    .attr("opacity", 0.18);
+
+  overlayPath.exit().remove();
+
+  ///////////////////////////
 
   // Create ticks for each month for the x-axis
   const monthTicks = d3
@@ -244,8 +456,6 @@ function drawChart() {
       tooltip.value.show = false;
     })
     .on("touchstart", (e) => e.preventDefault()); // Prevent scrolling on touch
-
-  isLoading.value = false;
 }
 
 onMounted(() => {
@@ -281,48 +491,11 @@ watch([() => props.series, () => props.hoveredYear], drawChart);
       maxHeight: height + 'px',
     }"
   >
-    <!-- Loading placeholder -->
-    <div
-      v-if="isLoading"
-      class="absolute inset-0 flex items-center justify-center z-20 text-gray-500 dark:text-gray-300 bg-white/70 dark:bg-gray-900/80 blur-md"
-      style=""
-    >
-      <svg
-        :viewBox="`0 0 ${width} ${height}`"
-        :width="'100%'"
-        :height="height"
-        class="w-full"
-        style=""
-        preserveAspectRatio="xMinYMin meet"
-      >
-        <g>
-          <!-- X Axis -->
-          <line
-            :x1="40"
-            :y1="height - 30"
-            :x2="width - 20"
-            :y2="height - 30"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-          <!-- Y Axis -->
-          <line
-            :x1="40"
-            :y1="height - 30"
-            :x2="40"
-            :y2="20"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-        </g>
-      </svg>
-    </div>
-
-    <svg v-else ref="svg" class="block w-full h-auto"></svg>
+    <svg ref="svg" class="block w-full h-auto"></svg>
 
     <!-- Tooltip -->
     <div
-      v-if="tooltip.show && tooltip.x && tooltip.y && !isLoading"
+      v-if="tooltip.show && tooltip.x && tooltip.y"
       class="absolute pointer-events-none z-10 px-3 py-2 rounded shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs"
       :style="{
         left: Math.min(Math.max(tooltip.x + 10, 0), width - 120) + 'px',

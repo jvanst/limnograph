@@ -71,13 +71,13 @@ npm run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
-## Using csv_to_points.js
+## Using csvs_to_points.js
 
 To convert the raw CSV data to point data for visualization, run the following command from the `app/data` directory:
 
 ```bash
 cd app/data
-node csv_to_points.js ./daily_historical.csv
+node csvs_to_points.js
 ```
 
-This will process `daily_historical.csv` and output into an optimized format for displays daily averages.
+This will process `historical.csv` & `current_year.csv` into an optimized format for displays daily averages.
