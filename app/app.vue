@@ -5,8 +5,9 @@ import LimnoGraph from "~/components/LimnoGraph.vue";
 import YearBadge from "./components/YearBadge.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import { useColorPalette } from "~/composables/useColorPalette";
-import { YEARS } from "~/data/formatted/index";
 import { useYearSelection } from "~/composables/useYearSelection";
+import { YEARS } from "~/data/formatted/index";
+import { normalOperating, upperOperating, lowerOperating } from "~/data/formatted/operatingZones";
 
 const { selectedYears, hoveredYear, selectedSeries, addYear, removeYear } = useYearSelection();
 const { colors } = useColorPalette();
@@ -28,6 +29,11 @@ const { colors } = useColorPalette();
           :series="selectedSeries"
           :colors="colors"
           :hovered-year="hoveredYear"
+          :operating-zones="{
+            normalOperating,
+            upperOperating,
+            lowerOperating,
+          }"
         />
       </div>
       <div class="flex flex-wrap gap-2">
