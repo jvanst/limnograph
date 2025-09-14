@@ -13,6 +13,7 @@ const svg = ref<SVGSVGElement | null>(null);
 const container = ref<HTMLElement | null>(null);
 const width = ref(800);
 const height = ref(400);
+const currentYear = new Date().getFullYear();
 
 const tooltip = ref({
   show: false,
@@ -24,10 +25,9 @@ const tooltip = ref({
 });
 
 // Helper to convert day-of-year to month name and day of month
-function getMonthDay(day: number | null): string {
-  if (day == null) return "";
-  // Use year 2000 (leap year) for correct mapping
-  const date = new Date(2000, 0, 1);
+function getMonthDay(year: number | null, day: number | null): string {
+  if (year == null || day == null) return "";
+  const date = new Date(year, 0, 1);
   date.setDate(date.getDate() + day);
   const month = date.toLocaleString("default", { month: "short" });
   const dayOfMonth = date.getDate();
@@ -73,15 +73,15 @@ function drawChart() {
   // Create ticks for each month for the x-axis
   const monthTicks = d3
     .range(0, 12)
-    .map((m) => d3.timeMonth.offset(new Date(2000, 0, 1), m));
+    .map((m) => d3.timeMonth.offset(new Date(currentYear, 0, 1), m));
   // X axis: shows months
   const xAxis = d3
     .axisBottom(x)
     .tickValues(
-      monthTicks.map((d) => d3.timeDay.count(new Date(2000, 0, 1), d))
+      monthTicks.map((d) => d3.timeDay.count(new Date(currentYear, 0, 1), d))
     )
     .tickFormat((d, i) =>
-      d3.timeFormat("%b")(monthTicks[i] ?? new Date(2000, i, 1))
+      d3.timeFormat("%b")(monthTicks[i] ?? new Date(currentYear, i, 1))
     );
   // Y axis: shows values
   const yAxis = d3.axisLeft(y);
@@ -299,7 +299,7 @@ watch(() => props.series, drawChart);
       }"
     >
       <div>
-        <b>{{ tooltip.year }}</b> — {{ getMonthDay(tooltip.day) }}
+        <b>{{ tooltip.year }}</b> — {{ getMonthDay(tooltip.year, tooltip.day) }}
       </div>
       <div>
         Value: <b>{{ tooltip.value?.toFixed(2) }}m</b>

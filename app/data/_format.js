@@ -59,8 +59,8 @@ for (const row of allParsedLines) {
   const value = parseFloat(row.value);
   if (isNaN(date.getTime()) || isNaN(value)) continue;
 
-  const year = date.getFullYear();
-  const startOfYear = new Date(year, 0, 1);
+  const year = date.getUTCFullYear();
+  const startOfYear = new Date(Date.UTC(year, 0, 1));
   const dayOfYear = Math.floor(
     (date.getTime() - startOfYear.getTime()) / 86400000
   );
