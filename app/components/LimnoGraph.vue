@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import * as d3 from "d3";
-import { YEARS, GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
-import { getContrastColorPalette } from "~/util/color";
+import { GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
+
 
 const props = defineProps<{
   series: YearlyPoints[];
+  colors: Record<string, string>;
 }>();
 
-const colorMode = useColorMode(); // colorMode.value is 'dark' or 'light'
 
 const svg = ref<SVGSVGElement | null>(null);
 const container = ref<HTMLElement | null>(null);
@@ -110,22 +110,9 @@ function drawChart() {
       .text("↑ Meters");
   }
 
-  // Color scale: assigns a unique color to each year
-  // Ensure consistent color mapping across years and browsing sessions
-  const backgroundColor = colorMode.value === "dark" ? "#091a28" : "#FFFFFF";
-  const colorPalette = getContrastColorPalette(
-    [
-      ...d3.schemeCategory10,
-      ...(Array.isArray(d3.schemeSet3) ? d3.schemeSet3 : []),
-      ...(Array.isArray(d3.schemePaired) ? d3.schemePaired : []),
-      ...(Array.isArray(d3.schemeDark2) ? d3.schemeDark2 : []),
-    ].filter((c) => typeof c === "string"),
-    backgroundColor
-  );
-  const color = d3
-    .scaleOrdinal<string, string>()
-    .domain(YEARS.map(String))
-    .range(colorPalette.slice(0, YEARS.length));
+
+  // Use colors prop for color mapping
+  const color = (year: string) => props.colors[year] || '#888';
 
   /**
    * D3 Quadtree: a fast spatial index for 2D points.
@@ -166,7 +153,7 @@ function drawChart() {
     .enter()
     .append("path")
     .attr("fill", "none")
-    .attr("stroke", (d) => color(String(d.year)))
+  .attr("stroke", (d) => color(String(d.year)))
     .attr("stroke-width", 1.5)
     .attr("d", (d) =>
       d3
@@ -194,7 +181,7 @@ function drawChart() {
 
   // UPDATE: Update existing lines
   pathElements
-    .attr("stroke", (d) => color(String(d.year)))
+  .attr("stroke", (d) => color(String(d.year)))
     .attr("stroke-width", 1.5)
     .attr("d", (d) =>
       d3
@@ -242,7 +229,7 @@ function drawChart() {
 
       // Move dot to closest point and color it
       dot.attr("transform", `translate(${closest.x},${closest.y})`);
-      dot.select("circle").attr("fill", color(String(closest.year)));
+  dot.select("circle").attr("fill", color(String(closest.year)));
     })
     .on("pointerleave", () => {
       // Reset all lines to default stroke-width and opacity

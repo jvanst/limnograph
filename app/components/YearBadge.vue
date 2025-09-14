@@ -1,7 +1,12 @@
+
 <template>
   <span
-    class="inline-flex items-center gap-x-0.5 rounded-md bg-gray-50 px-2 py-1 font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20"
+    class="inline-flex items-center gap-x-1 rounded-md bg-gray-50 px-2 py-1 font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20"
   >
+    <span
+      class="inline-block mr-1 rounded-full"
+      :style="{ width: '0.85em', height: '0.85em', background: color, display: 'inline-block' }"
+    />
     {{ label }}
     <button
       type="button"
@@ -23,6 +28,7 @@
 <script setup lang="ts">
 defineProps<{
   label: string;
+  color?: string;
 }>();
 
 defineEmits<{

@@ -3,8 +3,9 @@ import { ref, computed, onMounted, watch } from "vue";
 import SelectYear from "./components/SelectYear.vue";
 import SelectAll from "./components/SelectAll.vue";
 import LimnoGraph from "~/components/LimnoGraph.vue";
-import AppBadge from "~/components/AppBadge.vue";
+import YearBadge from "~/components/YearBadge.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
+import { useColorPalette } from "~/composables/useColorPalette";
 import { YEARS } from "~/data/formatted/index";
 
 import "~/data/formatted/2025"; // preload the default year
@@ -72,6 +73,9 @@ const selectedSeries = computed(() =>
     .filter((series): series is YearlyPoints[] => !!series)
     .flat()
 );
+
+// Use color palette composable
+const { colors } = useColorPalette();
 </script>
 
 <template>
@@ -86,7 +90,7 @@ const selectedSeries = computed(() =>
     </header>
     <div class="grid grid-cols-1 gap-4">
       <div>
-        <LimnoGraph :series="selectedSeries" />
+        <LimnoGraph :series="selectedSeries" :colors="colors" />
       </div>
       <div class="flex flex-wrap gap-2">
         <SelectYear
@@ -103,10 +107,11 @@ const selectedSeries = computed(() =>
         </button>
       </div>
       <div class="flex flex-wrap gap-2">
-        <AppBadge
+        <YearBadge
           v-for="year in selectedYears"
           :key="year"
           :label="year.toString()"
+          :color="colors[year]"
           @remove="removeYear(year)"
         />
       </div>
