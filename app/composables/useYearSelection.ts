@@ -1,17 +1,19 @@
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "nuxt/app";
 import { YEARS } from "~/data/formatted/index";
+import { points2025 } from "~/data/formatted/2025";
 
 const DEFAULT_YEAR = 2025;
 
 export function useYearSelection() {
   const route = useRoute();
   const router = useRouter();
-  const selectedYears = ref<number[]>([]);
-  const yearData = ref<Record<number, YearlyPoints[]>>({});
+  const selectedYears = ref<number[]>([DEFAULT_YEAR]);
+  const yearData = ref<Record<number, YearlyPoints[]>>({
+    2025: [points2025 as YearlyPoints],
+  });
   const hoveredYear = ref<number | null>(null);
 
-  // On mount, parse years from query param
   onMounted(() => {
     const queryYears = route.query.years;
     if (typeof queryYears === "string") {
@@ -23,12 +25,10 @@ export function useYearSelection() {
         selectedYears.value = years;
         selectedYears.value.forEach(loadYear);
       } catch {
-        addYear(DEFAULT_YEAR);
+        // ignore invalid query
       }
-    } else {
-      addYear(DEFAULT_YEAR);
     }
-  });
+  })
 
   // Watch selectedYears and update the URL
   watch(

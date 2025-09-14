@@ -2,19 +2,18 @@
 import * as d3 from "d3";
 import { GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
 
-
 const props = defineProps<{
   series: YearlyPoints[];
   colors: Record<string, string>;
   hoveredYear?: number | null;
 }>();
 
-
 const svg = ref<SVGSVGElement | null>(null);
 const container = ref<HTMLElement | null>(null);
 const width = ref(800);
 const height = ref(400);
 const currentYear = new Date().getFullYear();
+const isLoading = ref(true);
 
 const tooltip = ref({
   show: false,
@@ -42,8 +41,7 @@ function updateChartWidth() {
 }
 
 function drawChart() {
-  // If no SVG or no data, do nothing
-  if (!svg.value || !props.series.length) return;
+  isLoading.value = true;
 
   // Chart dimensions and margins
   const w = width.value;
@@ -111,9 +109,8 @@ function drawChart() {
       .text("↑ Meters");
   }
 
-
   // Use colors prop for color mapping
-  const color = (year: string) => props.colors[year] || '#888';
+  const color = (year: string) => props.colors[year] || "#888";
 
   /**
    * D3 Quadtree: a fast spatial index for 2D points.
@@ -238,17 +235,17 @@ function drawChart() {
 
       // Move dot to closest point and color it
       dot.attr("transform", `translate(${closest.x},${closest.y})`);
-  dot.select("circle").attr("fill", color(String(closest.year)));
+      dot.select("circle").attr("fill", color(String(closest.year)));
     })
     .on("pointerleave", () => {
       // Reset all lines to default stroke-width and opacity
-      gLines.selectAll("path")
-        .attr("stroke-width", 1.5)
-        .attr("opacity", 1);
+      gLines.selectAll("path").attr("stroke-width", 1.5).attr("opacity", 1);
       dot.attr("display", "none");
       tooltip.value.show = false;
     })
     .on("touchstart", (e) => e.preventDefault()); // Prevent scrolling on touch
+
+  isLoading.value = false;
 }
 
 onMounted(() => {
@@ -271,25 +268,61 @@ onBeforeUnmount(() => {
 });
 
 // Redraw chart whenever the data or hoveredYear changes
-watch([
-  () => props.series,
-  () => props.hoveredYear
-], drawChart);
+watch([() => props.series, () => props.hoveredYear], drawChart);
 </script>
 
 <template>
-  <div ref="container" class="w-full relative -px-4">
-  <svg v-if="props.series.length" ref="svg" class="block w-full h-auto" />
+  <div
+    ref="container"
+    class="w-full relative -px-4"
+    :style="{
+      height: height + 'px',
+      minHeight: height + 'px',
+      maxHeight: height + 'px',
+    }"
+  >
+    <!-- Loading placeholder -->
     <div
-      v-else
-      class="flex items-center justify-center w-full text-gray-400 dark:text-gray-300 text-lg bg-white dark:bg-[#182c3a] border border-dashed border-gray-200 dark:border-gray-700 rounded-lg"
-      :style="{ height: height + 'px', minHeight: '200px' }"
+      v-if="isLoading"
+      class="absolute inset-0 flex items-center justify-center z-20 text-gray-500 dark:text-gray-300 bg-white/70 dark:bg-gray-900/80 blur-md"
+      style=""
     >
-      No data to display.
+      <svg
+        :viewBox="`0 0 ${width} ${height}`"
+        :width="'100%'"
+        :height="height"
+        class="w-full"
+        style=""
+        preserveAspectRatio="xMinYMin meet"
+      >
+        <g>
+          <!-- X Axis -->
+          <line
+            :x1="40"
+            :y1="height - 30"
+            :x2="width - 20"
+            :y2="height - 30"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <!-- Y Axis -->
+          <line
+            :x1="40"
+            :y1="height - 30"
+            :x2="40"
+            :y2="20"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        </g>
+      </svg>
     </div>
 
+    <svg v-else ref="svg" class="block w-full h-auto"></svg>
+
+    <!-- Tooltip -->
     <div
-      v-if="tooltip.show && tooltip.x && tooltip.y"
+      v-if="tooltip.show && tooltip.x && tooltip.y && !isLoading"
       class="absolute pointer-events-none z-10 px-3 py-2 rounded shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs"
       :style="{
         left: Math.min(Math.max(tooltip.x + 10, 0), width - 120) + 'px',

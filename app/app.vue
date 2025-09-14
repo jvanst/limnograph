@@ -8,8 +8,6 @@ import { useColorPalette } from "~/composables/useColorPalette";
 import { YEARS } from "~/data/formatted/index";
 import { useYearSelection } from "~/composables/useYearSelection";
 
-import "~/data/formatted/2025"; // preload the default year
-
 const { selectedYears, hoveredYear, selectedSeries, addYear, removeYear } = useYearSelection();
 const { colors } = useColorPalette();
 </script>
