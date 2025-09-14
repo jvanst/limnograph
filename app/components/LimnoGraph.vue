@@ -278,7 +278,7 @@ watch([
 </script>
 
 <template>
-  <div ref="container" class="w-full relative">
+  <div ref="container" class="w-full relative -px-4">
   <svg v-if="props.series.length" ref="svg" class="block w-full h-auto" />
     <div
       v-else
