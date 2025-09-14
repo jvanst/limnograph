@@ -27,6 +27,5 @@ curl 'https://wateroffice.ec.gc.ca/download/report_e.html?dt=3&df=csv&ext=zip' \
   -o report.zip
 
 # Extract the CSV from the zip and rename it
-unzip -j report.zip '*.csv' -d .
-mv *.csv current_year.csv
+unzip -j report.zip '*.csv' -d . && mv $(ls ./*.csv | head -n1) current_year.csv
 rm report.zip
