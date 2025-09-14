@@ -16,6 +16,7 @@ const router = useRouter();
 
 const selectedYears = ref<number[]>([]);
 const yearData = ref<Record<number, YearlyPoints[]>>({});
+const hoveredYear = ref<number | null>(null);
 
 // On mount, parse years from query param
 onMounted(() => {
@@ -90,7 +91,11 @@ const { colors } = useColorPalette();
     </header>
     <div class="grid grid-cols-1 gap-4">
       <div>
-        <LimnoGraph :series="selectedSeries" :colors="colors" />
+        <LimnoGraph
+          :series="selectedSeries"
+          :colors="colors"
+          :hovered-year="hoveredYear"
+        />
       </div>
       <div class="flex flex-wrap gap-2">
         <SelectYear
@@ -113,6 +118,8 @@ const { colors } = useColorPalette();
           :label="year.toString()"
           :color="colors[year]"
           @remove="removeYear(year)"
+          @mouseenter="hoveredYear = year"
+          @mouseleave="hoveredYear = null"
         />
       </div>
     </div>

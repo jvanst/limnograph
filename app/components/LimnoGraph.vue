@@ -6,6 +6,7 @@ import { GLOBAL_MIN, GLOBAL_MAX } from "~/data/formatted";
 const props = defineProps<{
   series: YearlyPoints[];
   colors: Record<string, string>;
+  hoveredYear?: number | null;
 }>();
 
 
@@ -153,7 +154,7 @@ function drawChart() {
     .enter()
     .append("path")
     .attr("fill", "none")
-  .attr("stroke", (d) => color(String(d.year)))
+    .attr("stroke", (d) => color(String(d.year)))
     .attr("stroke-width", 1.5)
     .attr("d", (d) =>
       d3
@@ -181,15 +182,23 @@ function drawChart() {
 
   // UPDATE: Update existing lines
   pathElements
-  .attr("stroke", (d) => color(String(d.year)))
-    .attr("stroke-width", 1.5)
+    .attr("stroke", (d) => color(String(d.year)))
+    .attr("stroke-width", (d) =>
+      props.hoveredYear != null && String(d.year) === String(props.hoveredYear)
+        ? 3
+        : 1.5
+    )
+    .attr("opacity", (d) =>
+      props.hoveredYear != null && String(d.year) !== String(props.hoveredYear)
+        ? 0.2
+        : 1
+    )
     .attr("d", (d) =>
       d3
         .line<[number, number]>()
         .x(([day]) => x(day))
         .y(([_, value]) => y(value))(d.line)
-    )
-    .attr("opacity", 1);
+    );
 
   // Dot for tooltip: highlights the nearest point
   const dot = svgEl.append("g").attr("display", "none");
@@ -261,8 +270,11 @@ onBeforeUnmount(() => {
     resizeObserver.unobserve(container.value);
 });
 
-// Redraw chart whenever the data changes
-watch(() => props.series, drawChart);
+// Redraw chart whenever the data or hoveredYear changes
+watch([
+  () => props.series,
+  () => props.hoveredYear
+], drawChart);
 </script>
 
 <template>
