@@ -11,6 +11,7 @@
 		"binding": "ASSETS",
 		"directory": "./.output/public/"
 	},
+	"routes": [{ "pattern": "jvan.ca/kawagama*", "zone_id": "3616975f167262123447792a0862aaa6" }],
 	"observability": {
 		"enabled": true
 	}
