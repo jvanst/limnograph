@@ -2,9 +2,9 @@
 export default defineNuxtConfig({
   app: {
     head: {
-      title: 'Limnograph',
+      title: 'Kawagama Water Levels',
       meta: [
-        { name: 'description', content: 'A web app for visualizing limnological data' }
+        { name: 'description', content: 'A web app for visualizing kawagama lake water level data' }
       ],
       htmlAttrs: {
         lang: 'en'

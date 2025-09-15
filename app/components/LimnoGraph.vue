@@ -23,6 +23,7 @@ const props = defineProps<{
   colors: Record<string, string>;
   hoveredYear?: number | null;
   operatingZones?: OperatingZonesType;
+  showYAxis?: boolean;
 }>();
 
 const svg = ref<SVGSVGElement | null>(null);
@@ -62,7 +63,11 @@ function drawChart() {
   // Chart dimensions and margins
   const w = width.value;
   const h = height.value;
-  const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+  const margin = { top: 20, right: 0, bottom: 20, left: 25 };
+
+  if (!props.showYAxis) {
+    margin.left = 0;
+  }
 
   // Select the SVG element and set its size and viewBox
   const svgEl = d3
@@ -181,7 +186,7 @@ function drawChart() {
       gLabels
         .append("text")
         .attr("x", w - margin.right - rightPadding)
-        .attr("y", last ? y(last.lower) - 8 : margin.top)
+        .attr("y", last ? y(last.lower) - 10 : margin.top)
         .attr("text-anchor", "end")
         .attr("fill", "var(--zone-label-lower)")
         .attr("font-size", 12)
@@ -209,11 +214,10 @@ function drawChart() {
   }
   // Low Water
   if (areaDataLowWater && areaDataLowWater.length > 0) {
-    const last = areaDataLowWater[areaDataLowWater.length - 1];
     gLabels
       .append("text")
       .attr("x", w - margin.right - 4)
-      .attr("y", last ? y(last.value) + 15 : margin.top + 15)
+      .attr("y", h - margin.bottom - 10)
       .attr("text-anchor", "end")
       .attr("fill", "var(--zone-label-low)")
       .attr("font-size", 12)
@@ -225,11 +229,12 @@ function drawChart() {
 
   // --- High Water Area ---
   if (props.operatingZones) {
+    // High Water Area: fill from high water line to top of chart
     const areaHighWater = d3
       .area<{ day: number; value: number }>()
       .x((d) => x(d.day))
       .y0((d) => y(d.value))
-      .y1(() => y(GLOBAL_MAX))
+      .y1(() => margin.top)
       .curve(d3.curveLinear);
 
     const overlayPathHighWater = gOverlay
@@ -252,10 +257,11 @@ function drawChart() {
 
   // --- Low Water Area ---
   if (props.operatingZones) {
+    // Low Water Area: fill from low water line to bottom of chart
     const areaLowWater = d3
       .area<{ day: number; value: number }>()
       .x((d) => x(d.day))
-      .y0(() => y(GLOBAL_MIN))
+      .y0(() => h - margin.bottom)
       .y1((d) => y(d.value))
       .curve(d3.curveLinear);
 
@@ -346,8 +352,8 @@ function drawChart() {
       .attr("transform", `translate(0,${h - margin.bottom})`)
       .call(xAxis);
   }
-  // Draw y-axis (left) and add label
-  if (svgEl.select("g.y-axis").empty()) {
+
+  if (props.showYAxis && svgEl.select("g.y-axis").empty()) {
     svgEl
       .append("g")
       .attr("class", "y-axis")
@@ -525,7 +531,7 @@ watch([() => props.series, () => props.hoveredYear], drawChart);
 <template>
   <div
     ref="container"
-    class="w-full relative -px-4"
+    class="w-full relative"
     :style="{
       height: height + 'px',
       minHeight: height + 'px',
@@ -568,8 +574,8 @@ watch([() => props.series, () => props.hoveredYear], drawChart);
     --zone-label-normal: #6bbf7b;
     --zone-label-upper: #a2c94d;
     --zone-label-lower: #a2c94d;
-    --zone-label-high: #ffe066;
-    --zone-label-low: #ffe066;
+    --zone-label-high: #e6b93d;
+    --zone-label-low: #e6b93d;
   }
 }
 </style>
