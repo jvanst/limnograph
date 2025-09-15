@@ -9,9 +9,10 @@
     "preview": "npm run build && wrangler dev",
     "postinstall": "nuxt prepare",
     "deploy": "npm run build && wrangler deploy",
-		"cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/icon": "^2.0.0",

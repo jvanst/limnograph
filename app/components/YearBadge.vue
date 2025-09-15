@@ -1,7 +1,7 @@
 
 <template>
   <span
-    class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-50 px-3 py-1.5 text-base font-semibold text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20 hover:bg-gray-100 hover:ring-gray-500/20 dark:hover:bg-gray-400/20 dark:hover:ring-gray-400/40 cursor-pointer transition-colors"
+    class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-50 px-3 py-1.5 text-base font-semibold text-gray-600 ring-1 ring-inset ring-gray-300 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20 hover:bg-gray-100 hover:ring-gray-500/20 dark:hover:bg-gray-400/20 dark:hover:ring-gray-400/40 cursor-pointer transition-colors"
   >
     <span
       class="inline-block mr-1.5 rounded-full"
