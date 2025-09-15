@@ -75,7 +75,7 @@ const { colors } = useColorPalette();
             <a
               href="https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=02EB017"
               target="_blank"
-              class="text-blue-600 underline"
+              class="text-blue-600 dark:text-blue-400 underline"
             >
               Government of Canada Water Office</a>
             , which provides both historical and real-time water level information for Kawagama Lake.
