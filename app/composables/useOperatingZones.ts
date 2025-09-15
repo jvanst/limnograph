@@ -59,6 +59,6 @@ export function useOperatingZones() {
     lowerOperating,
     interpolate,
     getAreaData,
-    getSingleAreaData,
+    getSingleAreaData
   };
 }

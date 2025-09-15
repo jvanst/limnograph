@@ -134,6 +134,95 @@ function drawChart() {
     overlayPathLower.exit().remove();
   }
 
+  // --- Add zone labels ---
+  let gLabels = svgEl.select<SVGGElement>("g.zone-labels");
+  if (gLabels.empty()) {
+    gLabels = svgEl.append("g").attr("class", "zone-labels");
+  }
+  gLabels.selectAll("text").remove();
+
+  if (props.operatingZones) {
+    // Normal Operating
+    if (areaData && areaData.length > 0) {
+      const last = areaData[areaData.length - 1];
+      const rightPadding = 4;
+      gLabels
+        .append("text")
+        .attr("x", w - margin.right - rightPadding)
+        .attr("y", last ? y(last.lower) - 8 : margin.top)
+        .attr("text-anchor", "end")
+        .attr("fill", "var(--zone-label-normal)")
+        .attr("font-size", 12)
+        .attr("font-weight", "600")
+        .attr("style", "letter-spacing:0.5px;")
+        .attr("opacity", 0.5)
+        .text("Normal");
+    }
+    // Upper Operating
+    if (areaDataUpper && areaDataUpper.length > 0) {
+      const last = areaDataUpper[areaDataUpper.length - 1];
+      const rightPadding = 4;
+      gLabels
+        .append("text")
+        .attr("x", w - margin.right - rightPadding)
+        .attr("y", last ? y(last.lower) - 8 : margin.top)
+        .attr("text-anchor", "end")
+        .attr("fill", "var(--zone-label-upper)")
+        .attr("font-size", 12)
+        .attr("font-weight", "600")
+        .attr("style", "letter-spacing:0.5px;")
+        .attr("opacity", 0.5)
+        .text("Upper");
+    }
+    // Lower Operating
+    if (areaDataLower && areaDataLower.length > 0) {
+      const last = areaDataLower[areaDataLower.length - 1];
+      const rightPadding = 4;
+      gLabels
+        .append("text")
+        .attr("x", w - margin.right - rightPadding)
+        .attr("y", last ? y(last.lower) - 8 : margin.top)
+        .attr("text-anchor", "end")
+        .attr("fill", "var(--zone-label-lower)")
+        .attr("font-size", 12)
+        .attr("font-weight", "600")
+        .attr("style", "letter-spacing:0.5px;")
+        .attr("opacity", 0.5)
+        .text("Lower");
+    }
+  }
+
+  // High Water
+  if (areaDataHighWater && areaDataHighWater.length > 0) {
+    const last = areaDataHighWater[areaDataHighWater.length - 1];
+    gLabels
+      .append("text")
+      .attr("x", w - margin.right - 4)
+      .attr("y", last ? y(last.value) - 8 : margin.top)
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--zone-label-high)")
+      .attr("font-size", 12)
+      .attr("font-weight", "600")
+      .attr("style", "letter-spacing:0.5px;")
+      .attr("opacity", 0.5)
+      .text("High");
+  }
+  // Low Water
+  if (areaDataLowWater && areaDataLowWater.length > 0) {
+    const last = areaDataLowWater[areaDataLowWater.length - 1];
+    gLabels
+      .append("text")
+      .attr("x", w - margin.right - 4)
+      .attr("y", last ? y(last.value) + 15 : margin.top + 15)
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--zone-label-low)")
+      .attr("font-size", 12)
+      .attr("font-weight", "600")
+      .attr("style", "letter-spacing:0.5px;")
+      .attr("opacity", 0.5)
+      .text("Low");
+  }
+
   // --- High Water Area ---
   if (props.operatingZones) {
     const areaHighWater = d3
@@ -464,3 +553,23 @@ watch([() => props.series, () => props.hoveredYear], drawChart);
     </div>
   </div>
 </template>
+
+<style>
+:root {
+  --zone-label-normal: #6bbf7b;
+  --zone-label-upper: #dbe7a0;
+  --zone-label-lower: #dbe7a0;
+  --zone-label-high: #f9f6d2;
+  --zone-label-low: #f9f6d2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --zone-label-normal: #6bbf7b;
+    --zone-label-upper: #a2c94d;
+    --zone-label-lower: #a2c94d;
+    --zone-label-high: #ffe066;
+    --zone-label-low: #ffe066;
+  }
+}
+</style>
