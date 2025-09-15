@@ -17,7 +17,7 @@ jobs:
         working-directory: app/data
 
       - name: Format data
-        run: node _format.js
+        run: node csvs_to_points.js
         working-directory: app/data
 
       - name: Commit and push changes
