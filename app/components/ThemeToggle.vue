@@ -13,7 +13,7 @@ function togglePreference() {
 </script>
 
 <template>
-  <button type="button" class="p-1" @click="togglePreference()">
+  <button type="button" class="p-1" aria-label="Toggle color theme" @click="togglePreference()">
     <MoonIcon class="size-5 block dark:hidden" aria-hidden="true" />
     <SunIcon class="size-5 hidden dark:block" aria-hidden="true" />
   </button>

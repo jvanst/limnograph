@@ -22,7 +22,7 @@ const { colors } = useColorPalette();
   <div class="container mx-auto max-w-6xl px-4">
     <header class="mt-10 mb-2">
       <h1 class="text-4xl font-bold mb-2">Kawagama Water Levels</h1>
-      <h2 class="text-lg text-gray-600 max-w-2xl">
+      <h2 class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
         Daily water levels for Lake Kawagama from 2003 to present.
       </h2>
     </header>
