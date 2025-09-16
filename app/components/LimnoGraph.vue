@@ -96,6 +96,8 @@ function drawChart() {
   if (gOverlay.empty()) {
     gOverlay = svgEl.insert("g", ":first-child").attr("class", "overlay-zone");
   }
+  // Remove all previous overlay paths before drawing new ones
+  gOverlay.selectAll("path.zone, path.zone-lower, path.zone-upper, path.zone-highwater, path.zone-lowwater").remove();
 
   // Only draw operating zones if provided
   let areaData,
@@ -123,20 +125,12 @@ function drawChart() {
       .y1((d) => y(d.upper))
       .curve(d3.curveLinear);
 
-    const overlayPathLower = gOverlay
-      .selectAll<SVGPathElement, typeof areaDataLower>("path.zone-lower")
-      .data([areaDataLower]);
-
-    overlayPathLower
-      .enter()
+    gOverlay
       .append("path")
       .attr("class", "zone-lower")
-      .merge(overlayPathLower)
-      .attr("d", (d) => areaLower(d ?? []))
+      .attr("d", areaLower(areaDataLower ?? []))
       .attr("fill", "#cddc39") // muted green-yellow
       .attr("opacity", 0.18);
-
-    overlayPathLower.exit().remove();
   }
 
   // --- Add zone labels ---
@@ -144,6 +138,7 @@ function drawChart() {
   if (gLabels.empty()) {
     gLabels = svgEl.append("g").attr("class", "zone-labels");
   }
+  // Remove all previous zone labels before drawing new ones
   gLabels.selectAll("text").remove();
 
   if (props.operatingZones) {
@@ -237,22 +232,12 @@ function drawChart() {
       .y1(() => margin.top)
       .curve(d3.curveLinear);
 
-    const overlayPathHighWater = gOverlay
-      .selectAll<SVGPathElement, typeof areaDataHighWater>(
-        "path.zone-highwater"
-      )
-      .data([areaDataHighWater]);
-
-    overlayPathHighWater
-      .enter()
+    gOverlay
       .append("path")
       .attr("class", "zone-highwater")
-      .merge(overlayPathHighWater)
-      .attr("d", (d) => areaHighWater(d ?? []))
+      .attr("d", areaHighWater(areaDataHighWater ?? []))
       .attr("fill", "#fff176") // muted yellow
       .attr("opacity", 0.18);
-
-    overlayPathHighWater.exit().remove();
   }
 
   // --- Low Water Area ---
@@ -265,20 +250,12 @@ function drawChart() {
       .y1((d) => y(d.value))
       .curve(d3.curveLinear);
 
-    const overlayPathLowWater = gOverlay
-      .selectAll<SVGPathElement, typeof areaDataLowWater>("path.zone-lowwater")
-      .data([areaDataLowWater]);
-
-    overlayPathLowWater
-      .enter()
+    gOverlay
       .append("path")
       .attr("class", "zone-lowwater")
-      .merge(overlayPathLowWater)
-      .attr("d", (d) => areaLowWater(d ?? []))
+      .attr("d", areaLowWater(areaDataLowWater ?? []))
       .attr("fill", "#fff176") // muted yellow
       .attr("opacity", 0.18);
-
-    overlayPathLowWater.exit().remove();
   }
   if (props.operatingZones) {
     const areaUpper = d3
@@ -288,20 +265,12 @@ function drawChart() {
       .y1((d) => y(d.upper))
       .curve(d3.curveLinear);
 
-    const overlayPathUpper = gOverlay
-      .selectAll<SVGPathElement, typeof areaDataUpper>("path.zone-upper")
-      .data([areaDataUpper]);
-
-    overlayPathUpper
-      .enter()
+    gOverlay
       .append("path")
       .attr("class", "zone-upper")
-      .merge(overlayPathUpper)
-      .attr("d", (d) => areaUpper(d ?? []))
+      .attr("d", areaUpper(areaDataUpper ?? []))
       .attr("fill", "#cddc39") // muted green-yellow
       .attr("opacity", 0.18);
-
-    overlayPathUpper.exit().remove();
   }
 
   if (props.operatingZones) {
@@ -312,20 +281,12 @@ function drawChart() {
       .y1((d) => y(d.upper))
       .curve(d3.curveLinear);
 
-    const overlayPath = gOverlay
-      .selectAll<SVGPathElement, typeof areaData>("path.zone")
-      .data([areaData]);
-
-    overlayPath
-      .enter()
+    gOverlay
       .append("path")
       .attr("class", "zone")
-      .merge(overlayPath)
-      .attr("d", (d) => area(d ?? []))
+      .attr("d", area(areaData ?? []))
       .attr("fill", "#27ae60") // balanced pure green
       .attr("opacity", 0.18);
-
-    overlayPath.exit().remove();
   }
 
   // Create ticks for each month for the x-axis
@@ -344,28 +305,32 @@ function drawChart() {
   // Y axis: shows values
   const yAxis = d3.axisLeft(y);
 
-  // Draw x-axis (bottom)
-  if (svgEl.select("g.x-axis").empty()) {
-    svgEl
-      .append("g")
-      .attr("class", "x-axis")
-      .attr("transform", `translate(0,${h - margin.bottom})`)
-      .call(xAxis);
-  }
+  // Always redraw x-axis to reflect margin changes
+  svgEl.select("g.x-axis").remove();
+  svgEl
+    .append("g")
+    .attr("class", "x-axis")
+    .attr("transform", `translate(0,${h - margin.bottom})`)
+    .call(xAxis);
 
-  if (props.showYAxis && svgEl.select("g.y-axis").empty()) {
-    svgEl
-      .append("g")
-      .attr("class", "y-axis")
-      .attr("transform", `translate(${margin.left},0)`)
-      .call(yAxis)
-      .append("text")
-      .attr("x", 0)
-      .attr("y", margin.top - 10)
-      .attr("fill", "currentColor")
-      .attr("text-anchor", "start")
-      .attr("font-size", 13)
-      .text("↑ Meters");
+  if (props.showYAxis) {
+    if (svgEl.select("g.y-axis").empty()) {
+      svgEl
+        .append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(yAxis)
+        .append("text")
+        .attr("x", 0)
+        .attr("y", margin.top - 10)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .attr("font-size", 13)
+        .text("↑ Meters");
+    }
+  } else {
+    // Remove y-axis if it exists
+    svgEl.select("g.y-axis").remove();
   }
 
   // Use colors prop for color mapping
@@ -524,8 +489,11 @@ onBeforeUnmount(() => {
     resizeObserver.unobserve(container.value);
 });
 
-// Redraw chart whenever the data or hoveredYear changes
-watch([() => props.series, () => props.hoveredYear], drawChart);
+// Redraw chart whenever certain props change
+watch(
+  [() => props.series, () => props.hoveredYear, () => props.showYAxis, () => props.operatingZones],
+  drawChart
+);
 </script>
 
 <template>

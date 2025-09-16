@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import SelectYear from "./components/SelectYear.vue";
 import SelectAll from "./components/SelectAll.vue";
 import LimnoGraph from "~/components/LimnoGraph.vue";
@@ -7,15 +8,13 @@ import ThemeToggle from "./components/ThemeToggle.vue";
 import { useColorPalette } from "~/composables/useColorPalette";
 import { useYearSelection } from "~/composables/useYearSelection";
 import { YEARS } from "~/data/formatted/index";
-import {
-  normalOperating,
-  upperOperating,
-  lowerOperating,
-} from "~/data/formatted/operatingZones";
+import * as operatingZones from "~/data/formatted/operatingZones";
 
 const { selectedYears, hoveredYear, selectedSeries, addYear, removeYear } =
   useYearSelection();
 const { colors } = useColorPalette();
+const showYAxis = ref(false);
+const showOverlay = ref(true);
 </script>
 
 <template>
@@ -32,12 +31,8 @@ const { colors } = useColorPalette();
           :series="selectedSeries"
           :colors="colors"
           :hovered-year="hoveredYear"
-          :operating-zones="{
-            normalOperating,
-            upperOperating,
-            lowerOperating,
-          }"
-          :show-y-axis="false"
+          :operating-zones="showOverlay ? operatingZones : undefined"
+          :show-y-axis="showYAxis"
         />
       </div>
       <div class="flex justify-between">
@@ -70,13 +65,47 @@ const { colors } = useColorPalette();
           @mouseleave="hoveredYear = null"
         />
       </div>
-      <SettingsMenu />
+      <!-- Settings Section -->
+      <div class="w-ful mt-4">
+        <div>
+          <div class="rounded-lg shadow bg-gray-50 dark:bg-gray-800 mb-4">
+            <div
+              class="flex w-full justify-between items-center px-4 py-2 rounded-t-lg bg-white dark:bg-gray-900 text-base font-medium text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500"
+            >
+              <span>Display options</span>
+            </div>
+            <div class="px-4 py-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg">
+              <label class="flex items-center space-x-2">
+                <input
+                  v-model="showOverlay"
+                  type="checkbox"
+                  class="accent-indigo-600 h-4 w-4 rounded border-gray-300 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700"
+                />
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Show operating zones</span
+                >
+              </label>
+              <label class="flex items-center space-x-2 mt-3">
+                <input
+                  v-model="showYAxis"
+                  type="checkbox"
+                  class="accent-indigo-600 h-4 w-4 rounded border-gray-300 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700"
+                />
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Show y-axis</span
+                >
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Q/A Section -->
-      <section
-        class="mt-8 p-6 bg-gray-50 rounded-lg shadow dark:bg-gray-800 dark:shadow-lg"
-      >
+      <section class="px-8 py-10 rounded-lg space-y-8">
         <h3 class="text-xl font-semibold mb-4">Questions & Answers</h3>
-        <div class="mb-4">
+        <div
+          class="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-800"
+        >
           <p class="font-medium text-gray-900 dark:text-gray-100">
             Where does the data come from?
           </p>
@@ -93,7 +122,9 @@ const { colors } = useColorPalette();
             information for Kawagama Lake.
           </p>
         </div>
-        <div class="mb-4">
+        <div
+          class="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-800"
+        >
           <p class="font-medium text-gray-900 dark:text-gray-100">
             Is any data missing?
           </p>
@@ -102,7 +133,9 @@ const { colors } = useColorPalette();
             covered part of the year.
           </p>
         </div>
-        <div class="mb-4">
+        <div
+          class="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-800"
+        >
           <p class="font-medium text-gray-900 dark:text-gray-100">
             How often is the data updated?
           </p>
@@ -110,7 +143,7 @@ const { colors } = useColorPalette();
             New data is added daily, typically at midnight for the previous day.
           </p>
         </div>
-        <div>
+        <div class="space-y-2">
           <p class="font-medium text-gray-900 dark:text-gray-100">
             What do the shaded areas on the graph mean?
           </p>
@@ -123,6 +156,44 @@ const { colors } = useColorPalette();
         </div>
       </section>
     </div>
+  </div>
+
+  <div
+    class="flex flex-col items-center my-20"
+    aria-label="Personal introduction"
+  >
+    <img
+      class="size-20 block rounded-full object-cover object-center"
+      src="https://jvan.ca/avatar.png"
+      alt="James avatar"
+      width="96"
+      height="96"
+    />
+    <h1
+      class="mt-2 text-xl leading-8 tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl"
+    >
+      Hi I'm James 👋🏻
+    </h1>
+
+    <p class="mt-3 mr-2 sm:mt-4 max-w-xl px-2 prose dark:prose-invert text-center">
+      A Staff Software Engineer with over eight years of experience building
+      scalable web applications and leading high-impact technical initiatives.
+      <br /><br />
+      I love creating tools that make data more accessible and understandable.
+      This project is a personal initiative to visualize water level data for
+      Lake Kawagama, helping residents and cottage owners stay informed about
+      lake conditions.
+      <br /><br />
+      If you have any questions or feedback, feel free to reach out at
+      <a
+        href="mailto:jamesvansteenkiste@gmail.com"
+        class="text-blue-600 dark:text-blue-400 underline"
+        >jamesvansteenkiste@gmail.com</a
+      >.
+    </p>
+  </div>
+
+  <div class="flex" aria-label="Personal description">
     <ThemeToggle class="fixed bottom-4 right-4" />
   </div>
 </template>
