@@ -158,8 +158,10 @@ const showOverlay = ref(true);
     </div>
   </div>
 
+  <hr class="border-t border-gray-200 dark:border-gray-800 my-10" />
+
   <div
-    class="flex flex-col items-center my-20"
+    class="flex flex-col items-center my-18"
     aria-label="Personal introduction"
   >
     <img
@@ -175,7 +177,9 @@ const showOverlay = ref(true);
       Hi I'm James 👋🏻
     </h1>
 
-    <p class="mt-3 mr-2 sm:mt-4 max-w-xl px-2 prose dark:prose-invert text-center">
+    <p
+      class="mt-3 mr-2 sm:mt-4 max-w-xl px-2 prose dark:prose-invert text-center"
+    >
       A Staff Software Engineer with over eight years of experience building
       scalable web applications and leading high-impact technical initiatives.
       <br /><br />
@@ -193,7 +197,15 @@ const showOverlay = ref(true);
     </p>
   </div>
 
-  <div class="flex" aria-label="Personal description">
-    <ThemeToggle class="fixed bottom-4 right-4" />
+  <div class="flex justify-center my-4">
+    <a
+      href="https://jvan.ca"
+      rel="noopener noreferrer"
+      class="text-blue-500 dark:text-blue-500 text-base font-medium"
+    >
+      jvan.ca
+    </a>
   </div>
+
+  <ThemeToggle class="fixed bottom-4 right-4" />
 </template>
