@@ -34,9 +34,9 @@ function formatDeviation(val: number, reference: string) {
 }
 
 function deviationColor(val: number) {
-  if (val > 0) return "text-green-600 dark:text-green-400";
-  if (val < 0) return "text-red-600 dark:text-red-400";
-  return "text-gray-600 dark:text-gray-400";
+  if (val > 0) return "text-indigo-700 dark:text-indigo-400";
+  if (val < 0) return "text-indigo-500 dark:text-indigo-300";
+  return "text-indigo-400 dark:text-indigo-200";
 }
 
 function yearOnly(dateStr: string) {
