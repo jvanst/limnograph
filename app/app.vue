@@ -7,7 +7,16 @@ import YearBadge from "./components/YearBadge.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import { useColorPalette } from "~/composables/useColorPalette";
 import { useYearSelection } from "~/composables/useYearSelection";
-import { YEARS } from "~/data/formatted/index";
+import {
+  YEARS,
+  PERCENT_DIFFERENCE_TO_AVERAGE,
+  MIN_WATER_LEVEL_PERCENTAGE,
+  MAX_WATER_LEVEL_PERCENTAGE,
+  MIN_WATER_LEVEL_DATE,
+  MAX_WATER_LEVEL_DATE,
+  LAST_UPDATED_DATE,
+  CURRENT_WATER_LEVEL,
+} from "~/data/formatted/index";
 import * as operatingZones from "~/data/formatted/operatingZones";
 
 const { selectedYears, hoveredYear, selectedSeries, addYear, removeYear } =
@@ -15,15 +24,148 @@ const { selectedYears, hoveredYear, selectedSeries, addYear, removeYear } =
 const { colors } = useColorPalette();
 const showYAxis = ref(false);
 const showOverlay = ref(true);
+
+function formatDeviation(val: number, reference: string) {
+  if (val === null || val === undefined) return "--";
+  const absVal = Math.abs(val);
+  if (val > 0) return `+${absVal}% above ${reference}`;
+  if (val < 0) return `-${absVal}% below ${reference}`;
+  return "No deviation";
+}
+
+function deviationColor(val: number) {
+  if (val > 0) return "text-green-600 dark:text-green-400";
+  if (val < 0) return "text-red-600 dark:text-red-400";
+  return "text-gray-600 dark:text-gray-400";
+}
+
+function yearOnly(dateStr: string) {
+  if (!dateStr) return "--";
+  return dateStr.split("-")[0];
+}
+
+function prettyDate(dateStr: string) {
+  if (!dateStr) return "--";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 </script>
 
 <template>
+  <!-- Full-width Image Banner with Title Overlay -->
+  <div class="w-full mb-6 relative">
+    <img
+      src="/kawagama.webp"
+      alt="Kawagama Lake Banner"
+      class="block w-full h-48 md:h-64 object-cover object-center"
+    />
+  </div>
   <div class="container mx-auto max-w-6xl px-4">
     <header class="mt-10 mb-2">
-      <h1 class="text-4xl font-bold mb-2">Kawagama Water Levels</h1>
+      <h1
+        class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-2"
+      >
+        Kawagama Water Data
+      </h1>
       <h2 class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
-        Daily water levels for Lake Kawagama from 2003 to present.
+        Visualizing daily water levels for Lake Kawagama, Ontario.
       </h2>
+    </header>
+
+    <header class="mt-10 mb-2">
+      <h2
+        class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-2"
+      >
+        Current Level
+      </h2>
+      <h3 class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
+        Water level statistics for {{ prettyDate(LAST_UPDATED_DATE) }}.
+      </h3>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- Current vs Average -->
+      <div class="rounded-lg p-4 flex flex-col items-center">
+        <span
+          class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
+          title="How today's water level compares to the historical average for this day."
+        >
+          Current Level vs. Historical Average
+        </span>
+        <span
+          :class="`text-2xl font-bold ${deviationColor(
+            PERCENT_DIFFERENCE_TO_AVERAGE
+          )}`"
+        >
+          {{ formatDeviation(PERCENT_DIFFERENCE_TO_AVERAGE, "average") }}
+        </span>
+        <span
+          class="text-xs text-gray-400 mt-1"
+          title="Today's measured water level"
+        >
+          {{ CURRENT_WATER_LEVEL }} m
+        </span>
+      </div>
+      <!-- Current vs Historical Minimum -->
+      <div class="rounded-lg p-4 flex flex-col items-center">
+        <span
+          class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
+          title="How today's water level compares to the lowest ever recorded for this day."
+        >
+          Current Level vs. Historical Minimum
+        </span>
+        <span
+          :class="`text-2xl font-bold ${deviationColor(
+            MIN_WATER_LEVEL_PERCENTAGE
+          )}`"
+        >
+          {{ formatDeviation(MIN_WATER_LEVEL_PERCENTAGE, "minimum") }}
+        </span>
+        <span
+          class="text-xs text-gray-400 mt-1"
+          title="Lowest level ever recorded for this day"
+        >
+          All time daily low in {{ yearOnly(MIN_WATER_LEVEL_DATE) }}
+        </span>
+      </div>
+      <!-- Current vs Historical Maximum -->
+      <div class="rounded-lg p-4 flex flex-col items-center">
+        <span
+          class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
+          title="How today's water level compares to the highest ever recorded for this day."
+        >
+          Current Level vs. Historical Maximum
+        </span>
+        <span
+          :class="`text-2xl font-bold ${deviationColor(
+            MAX_WATER_LEVEL_PERCENTAGE
+          )}`"
+        >
+          {{ formatDeviation(MAX_WATER_LEVEL_PERCENTAGE, "maximum") }}
+        </span>
+        <span
+          class="text-xs text-gray-400 mt-1"
+          title="Highest level ever recorded for this day"
+        >
+          All time daily high in {{ yearOnly(MAX_WATER_LEVEL_DATE) }}
+        </span>
+      </div>
+    </div>
+
+    <header class="mt-10 mb-2">
+      <h2
+        class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-2"
+      >
+        Historical Data
+      </h2>
+      <h3 class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
+        Daily water levels for Lake Kawagama from 2003 to present.
+      </h3>
     </header>
     <div class="grid grid-cols-1 gap-4">
       <div class="relative -mx-4 md:-mx-0">
@@ -145,7 +287,7 @@ const showOverlay = ref(true);
         </div>
         <div class="space-y-2">
           <p class="font-medium text-gray-900 dark:text-gray-100">
-            What do the shaded areas on the graph mean?
+            What do the shaded areas (upper, normal, lower) on the graph mean?
           </p>
           <p class="ml-4 text-gray-700 dark:text-gray-300">
             The shaded regions show the Ministry of Natural Resources'
