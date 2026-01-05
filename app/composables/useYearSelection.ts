@@ -1,16 +1,16 @@
 import { ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "nuxt/app";
 import { YEARS } from "~/data/formatted/index";
-import { points2025 } from "~/data/formatted/2025";
+import { points2026 } from "~/data/formatted/2026";
 
-const DEFAULT_YEAR = 2025;
+const DEFAULT_YEAR = 2026;
 
 export function useYearSelection() {
   const route = useRoute();
   const router = useRouter();
   const selectedYears = ref<number[]>([DEFAULT_YEAR]);
   const yearData = ref<Record<number, YearlyPoints[]>>({
-    2025: [points2025 as YearlyPoints],
+    2026: [points2026 as YearlyPoints],
   });
   const hoveredYear = ref<number | null>(null);
 
