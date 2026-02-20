@@ -1,7 +1,7 @@
 // Auto-generated from current_year.csv and historical.csv
 export const points2026 = {
   year: 2026,
-  min: 8.605,
+  min: 8.597,
   max: 8.962,
   line: [
     [0, 8.878],
@@ -52,6 +52,7 @@ export const points2026 = {
     [45, 8.63],
     [46, 8.621],
     [47, 8.612],
-    [48, 8.605]
+    [48, 8.605],
+    [49, 8.597]
   ]
 };
