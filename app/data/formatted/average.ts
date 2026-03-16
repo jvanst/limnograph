@@ -1,6 +1,6 @@
 // Auto-generated daily average across all years
 export const pointsAverage = {
-  min: 8.52,
+  min: 8.53,
   max: 9.55,
   line: [
     [0, 8.9],
@@ -76,7 +76,7 @@ export const pointsAverage = {
     [70, 8.54],
     [71, 8.54],
     [72, 8.54],
-    [73, 8.52],
+    [73, 8.54],
     [74, 8.53],
     [75, 8.53],
     [76, 8.54],
